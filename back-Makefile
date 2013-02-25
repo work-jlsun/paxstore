@@ -1,0 +1,57 @@
+##################################################################
+CC = g++
+CFLAGS   +=  -O0  -g  -Wall -I/usr/local/BerkeleyDB.5.2/include/  -I./include  
+LDIR =  -L/usr/local/BerkeleyDB.5.2/lib/
+LINK = -levent -ldb  -lpthread  
+
+object1 = leaderthreads.o pqueue.o valuelist.o tools.o libevent_tcp_server.o  proposer.o logstore.o\
+	  logworker.o followerlist.o dbstorage.o   leadercatchup.o  metalogstore.o\
+	  commitsyncworker.o
+object2 = follower.o    LogStore.o  tools.o  dbstorage.o frecover.o metalogstore.o
+object3 = client.o tools.o
+object4 = metalogstore.o dbstorage.o pqueue.o
+
+object5 = logicaltruncatetable.o dbstorage.o 
+
+myobject = leaderthreads.o pqueue.o valuelist.o follower.o tools.o libevent_tcp_server.o  proposer.o logstore.o\
+           logworker.o followerlist.o  client.o dbstorage.o metalogstore.o \
+           frecover.o leadercatchup.o commitsyncworker.o logicaltruncatetable.o
+
+sources =  leaderthreads.cc pqueue.cc valuelist.cc tools.cc libevent_tcp_server.cc  proposer.cc logstore.cc\
+              logworker.cc followerlist.cc follower.cc client.cc dbstorage.cc metalogstore.cc \
+              frecover.cc leadercatchup.cc commitsyncworker.cc logicaltruncatetable.cc
+
+
+##################################################################
+#all: leaderstart followerstart  clientstart
+#all:metatest
+all: logicaltabletest
+
+leaderstart: $(object1)
+	$(CC)   $(LDIR)  $(LINK)  -o  $@  $^
+# thie  $@ = $folloerstart  $^ = $(object2)
+followerstart: $(object2)
+	$(CC)   $(LDIR)  $(LINK)  -o  $@  $^
+clientstart:  $(object3)
+	$(CC)   $(LDIR)  $(LINK)  -o  $@  $^
+#metatest: $(object4)
+#		        $(CC)   $(LDIR)  $(LINK)  -o  $@  $^
+
+logicaltabletest: $(object4)
+		        $(CC)   $(LDIR)  $(LINK)  -o  $@  $^
+	
+
+$(myobject):%.o: %.cc
+	$(CC) -c $(CFLAGS) $< -o $@
+
+clean:
+	rm followerstart leaderstart clientstart   *.o
+
+##################################################################
+include $(sources:.cc=.d)	
+
+%.d: %.cc
+		set -e; rm -f $@; \
+		$(CC) -MM $(CFLAGS) $< > $@.$$$$; \
+		sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+		rm -f $@.$$$$		

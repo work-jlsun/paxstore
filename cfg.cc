@@ -1,0 +1,5 @@
+#include "cfg.h"
+int  DEFAULT_PROT_NUM;
+int  LEADER_CATCHUP_PORT_NUM;
+int  FOLLOWERPORT;
+int  READ_PORT_NUM;
